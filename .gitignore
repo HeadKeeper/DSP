@@ -1,0 +1,7 @@
+.idea/
+out/
+pkg/
+/src/github.com/
+/src/gonum.org/
+/src/bitbucket.org/
+/src/golang.org/
