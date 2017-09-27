@@ -8,25 +8,7 @@ import (
 )
 
 const OUT_PATH string = "out/"
-const DEFAULT_LINE_WIDTH float64 = 2
-
-/*
-	Example of functions :
-			// A quadratic function x^2
-			quad := plotter.NewFunction(func(x float64) float64 { return x * x })
-			quad.Color = color.RGBA{B: 255, A: 255}
-
-			// An exponential function 2^x
-			exp := plotter.NewFunction(func(x float64) float64 { return math.Pow(2, x) })
-			exp.Width = vg.Points(2)
-			exp.Color = color.RGBA{G: 255, A: 255}
-
-			// The sine function, shifted and scaled
-			// to be nicely visible on the plot.
-			sin := plotter.NewFunction(func(x float64) float64 { return 10*math.Sin(x) + 50 })
-			sin.Width = vg.Points(4)
-			sin.Color = color.RGBA{R: 255, A: 255}
-*/
+const DEFAULT_LINE_WIDTH float64 = 1
 
 func CreatePlot(name string, axisXName string, axisYName string, axisXMin float64, axisXMax float64, axisYMin float64, axisYMax float64) *plot.Plot {
 	graph, err := plot.New()
@@ -49,6 +31,14 @@ func AddFunctionOnPlot(plot *plot.Plot, function func(n float64) float64, color 
 	fun := plotter.NewFunction(function)
 	fun.Color = color
 	fun.Width = vg.Points(DEFAULT_LINE_WIDTH)
+	plot.Add(fun)
+}
+
+func AddFunctionOnPlotWithLegend(plot *plot.Plot, function func(n float64) float64, color color.RGBA, functionName string) {
+	fun := plotter.NewFunction(function)
+	fun.Color = color
+	fun.Width = vg.Points(DEFAULT_LINE_WIDTH)
+	plot.Legend.Add(functionName, fun)
 	plot.Add(fun)
 }
 

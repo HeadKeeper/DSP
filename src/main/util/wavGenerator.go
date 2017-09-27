@@ -43,7 +43,7 @@ func WriteWAV(name string, soundLength int, function func(n float64) float64) {
 
 	writer.Close()
 	fmt.Println()
-	fmt.Println("WAV file created successful")
+	fmt.Println("WAV file '" + name + "' created successful")
 }
 
 func checkErr(err error) {
