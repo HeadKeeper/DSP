@@ -3,7 +3,6 @@ package lab1
 import (
 	"math"
 	"main/types"
-	"fmt"
 )
 
 const (
