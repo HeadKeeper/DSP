@@ -8,7 +8,7 @@ import (
 )
 
 const OUT_PATH string = "out/"
-const DEFAULT_LINE_WIDTH float64 = 1
+const DEFAULT_LINE_WIDTH float64 = 2
 
 func CreatePlot(name string, axisXName string, axisYName string, axisXMin float64, axisXMax float64, axisYMin float64, axisYMax float64) *plot.Plot {
 	graph, err := plot.New()

@@ -31,7 +31,7 @@ func WriteWAV(name string, soundLength int, function func(n float64) float64) {
 	checkErr(err)
 	defer writer.Close()
 
-	for n := 0; n < soundLength * DEFAULT_RATE; n++ {
+	for n := 0; n < soundLength / 2 * DEFAULT_RATE; n++ {
 		funRes := int32(
 			math.Pow(2, DEFAULT_BITS-1) *
 			function(float64(n)),
