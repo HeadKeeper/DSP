@@ -3,6 +3,7 @@ Labs on Go for Digital Signal Processing
 **Requirements:**
 
 On **Ubuntu 14.04** and above, type:
+
     sudo apt-get install mercurial
     go get -u github.com/Knetic/govaluate
     go get github.com/gonum/plot/
