@@ -21,7 +21,7 @@ const (
 	SECOND_OPTION__PATH string = INITIAL_PATH + "2/"
 	THIRD_OPTION__PATH string = INITIAL_PATH + "3/"
 
-	THIRD_OPTION__AMOUNT_CYCLES float64 = 5
+	THIRD_OPTION__AMOUNT_CYCLES = 5
 )
 
 
@@ -32,7 +32,7 @@ func PerformFirstOption()  {
 }
 
 func makeFirstOptionSub(subName string, values []float64, createFormula func(x float64, soundLength float64) func(x float64) float64)  {
-	plot := util.CreatePlot("Harmonic", "", "", AXIS_MIN_X, AXIS_MAX_X, -20, 20)
+	plot := util.CreatePlot("Harmonic", "n", "f(n)", AXIS_MIN_X, AXIS_MAX_X, -20, 20)
 
 	for index, element := range values {
 		formula := createFormula(element, float64(SOUND_LENGTH))
@@ -59,10 +59,10 @@ func makeFirstOptionThirdSub() {
 
 
 func PerformSecondOption()  {
-	plot := util.CreatePlot("Polyharmonic", "", "", AXIS_MIN_X, 500000, -35, 35)
+	plot := util.CreatePlot("Polyharmonic", "n", "f(n)", AXIS_MIN_X,1000000, -40, 40)
 
-	function := createSecondFormula(0, float64(SOUND_LENGTH))
-	util.AddFunctionOnPlotWithLegend(plot, function, util.CreateRandomColor(), "additional phi = 0")
+	function := createSecondFunction(0, float64(SOUND_LENGTH))
+	util.AddFunctionOnPlotWithLegend(plot, function, util.CreateRandomColor(), "")
 	util.WriteWAV(SECOND_OPTION__PATH + SOUND_NAME , SOUND_LENGTH, function)
 
 	util.SavePlotImage(SECOND_OPTION__PATH + PLOT_NAME, plot)
@@ -70,11 +70,11 @@ func PerformSecondOption()  {
 
 
 func PerformThirdOption()  {
-	plot := util.CreatePlot("Waves", "", "", AXIS_MIN_X, 10, -100, 100)
+	plot := util.CreatePlot("Polyharmonic", "n", "f(n)", AXIS_MIN_X, 10, -500, 500)
 
-	formula := createThirdFormula(THIRD_OPTION__INIT_HARMONIC, THIRD_OPTION__AMOUNT_CYCLES, float64(SOUND_LENGTH))
-	util.AddFunctionOnPlotWithLegend(plot, formula, util.CreateRandomColor(), "dynamic")
-	util.WriteWAV(THIRD_OPTION__PATH + SOUND_NAME, SOUND_LENGTH, formula)
+	function := createThirdFunction(THIRD_OPTION__INIT_HARMONIC, THIRD_OPTION__AMOUNT_CYCLES, float64(SOUND_LENGTH))
+	util.AddFunctionOnPlotWithLegend(plot, function, util.CreateRandomColor(), "Dynamic")
+	util.WriteWAV(THIRD_OPTION__PATH + SOUND_NAME, SOUND_LENGTH / 5, function)
 
 	util.SavePlotImage(THIRD_OPTION__PATH + PLOT_NAME, plot)
 }

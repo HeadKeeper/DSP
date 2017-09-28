@@ -100,7 +100,7 @@ func createFirstFunctionC(amplitude float64, soundLength float64) func(x float64
 }
 
 
-func createSecondFormula(additionalPhi float64, soundLength float64) func(n float64) float64 {
+func createSecondFunction(additionalPhi float64, soundLength float64) func(n float64) float64 {
 	return func(n float64) float64 {
 		var result float64 = 0
 		for _, harmonic := range SECOND_OPTION_HARMONICS {
@@ -111,14 +111,17 @@ func createSecondFormula(additionalPhi float64, soundLength float64) func(n floa
 }
 
 
-func createThirdFormula(harmonic types.Harmonic, cyclesCount float64, soundLength float64) func(x float64) float64 {
+func createThirdFunction(harmonic types.Harmonic, cyclesCount int, soundLength float64) func(x float64) float64 {
 	var coefficient float64 = float64(THIRD_OPTION__INC_MAX_VALUE) / float64(cyclesCount)
 
-	return func(x float64) float64 {
+	return func(n float64) float64 {
 		var value float64
+		if n == -10 {
+			harmonic = THIRD_OPTION__INIT_HARMONIC
+		}
 
-		for idx := 0; idx < int(cyclesCount); idx++ {
-			value += harmonic.Amplitude * math.Sin(2 * math.Pi * harmonic.Frequency * x / SIGNAL_RATE * soundLength + harmonic.Phi)
+		for idx := 0; idx < cyclesCount; idx++ {
+			value += harmonic.Amplitude * math.Sin(2 * math.Pi * harmonic.Frequency * n / SIGNAL_RATE * soundLength + harmonic.Phi)
 		}
 
 		harmonic.Phi = harmonic.Phi * (1.0 + coefficient)
