@@ -6,6 +6,13 @@ import (
 	"math"
 )
 
+const (
+	// w = 2 * Pi * f - angular speed of rotation
+	// phase = (2 * Pi * f * x) / N) * soundLength + initialAngle
+	SIGNAL_RATE float64 = 512
+	SOUND_LENGTH = 15
+)
+
 var functions = map[string]govaluate.ExpressionFunction {
 	"log": func(args ...interface{}) (interface{}, error) {
 		value := math.Log(args[0].(float64))
@@ -27,4 +34,9 @@ func EvaluateFormula(formula string, values map[string]interface{}) interface{} 
 	}
 
 	return result
+}
+
+func GetHarmonicFunction(amplitude float64, frequency float64, soundLength float64, phi float64) func(n float64) float64 {
+	return func(n float64) float64 {
+		return amplitude * math.Sin(2 * math.Pi * frequency * n / SIGNAL_RATE * soundLength + phi) }
 }

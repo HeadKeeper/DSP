@@ -3,14 +3,10 @@ package lab1
 import (
 	"math"
 	"main/types"
+	"main/util"
 )
 
 const (
-	// w = 2 * Pi * f - angular speed of rotation
-	// phase = (2 * Pi * f * x) / N) * soundLength + initialAngle
-
-	SIGNAL_RATE		    float64 = 512 			// signal rate
-
 	FIRST_OPTION__a__f  float64 = 4   		    // frequency
 	FIRST_OPTION__a__A  float64 = 9   		    // amplitude of fluctuations
 
@@ -81,30 +77,24 @@ var (
 	}
 )
 
-func getHarmonicFunction(amplitude float64, frequency float64, soundLength float64, phi float64) func(n float64) float64 {
-	return func(n float64) float64 {
-		return amplitude * math.Sin(2 * math.Pi * frequency * n / SIGNAL_RATE * soundLength + phi) }
-}
-
-
 func createFirstFunctionA(phi float64, soundLength float64) func(n float64) float64 {
-	return getHarmonicFunction(FIRST_OPTION__a__A, FIRST_OPTION__a__f, soundLength, phi)
+	return util.GetHarmonicFunction(FIRST_OPTION__a__A, FIRST_OPTION__a__f, soundLength, phi)
 }
 
 func createFirstFunctionB(frequency float64, soundLength float64) func(x float64) float64 {
-	return getHarmonicFunction(FIRST_OPTION__b__A, frequency, soundLength, FIRST_OPTION__b__y)
+	return util.GetHarmonicFunction(FIRST_OPTION__b__A, frequency, soundLength, FIRST_OPTION__b__y)
 }
 
 func createFirstFunctionC(amplitude float64, soundLength float64) func(x float64) float64 {
-	return getHarmonicFunction(amplitude, FIRST_OPTION__c__f, soundLength, FIRST_OPTION__c__y)
+	return util.GetHarmonicFunction(amplitude, FIRST_OPTION__c__f, soundLength, FIRST_OPTION__c__y)
 }
 
 
-func createSecondFunction(additionalPhi float64, soundLength float64) func(n float64) float64 {
+func createSecondFunction(soundLength float64) func(n float64) float64 {
 	return func(n float64) float64 {
 		var result float64 = 0
 		for _, harmonic := range SECOND_OPTION_HARMONICS {
-			result += harmonic.Amplitude * math.Sin(2 * math.Pi * harmonic.Frequency * n / SIGNAL_RATE * soundLength + harmonic.Phi + additionalPhi)
+			result += util.GetHarmonicFunction(harmonic.Amplitude, harmonic.Frequency, soundLength, harmonic.Phi)(n)
 		}
 		return result
 	}
@@ -121,7 +111,7 @@ func createThirdFunction(harmonic types.Harmonic, cyclesCount int, soundLength f
 		}
 
 		for idx := 0; idx < cyclesCount; idx++ {
-			value += harmonic.Amplitude * math.Sin(2 * math.Pi * harmonic.Frequency * n / SIGNAL_RATE * soundLength + harmonic.Phi)
+			value += util.GetHarmonicFunction(harmonic.Amplitude, harmonic.Frequency, soundLength, harmonic.Phi)(n)
 		}
 
 		harmonic.Phi = harmonic.Phi * (1.0 + coefficient)

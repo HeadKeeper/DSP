@@ -1,74 +1,46 @@
 package util
 
 import (
-	"image/color"
-	"gonum.org/v1/plot"
-	"gonum.org/v1/plot/plotter"
-	"gonum.org/v1/plot/vg"
-	//"github.com/veandco/go-sdl2/sdl"
+	"bitbucket.org/binet/go-gnuplot/pkg/gnuplot"
+	"fmt"
+	"main/types"
 )
 
 const OUT_PATH string = "out/"
-const DEFAULT_LINE_WIDTH float64 = 2
 
-func CreatePlot(name string, axisXName string, axisYName string, axisXMin float64, axisXMax float64, axisYMin float64, axisYMax float64) *plot.Plot {
-	graph, err := plot.New()
+func CreatePlot(axisXName string, axisYName string, plotName string, functions []types.FunctionData) {
+	plotter,err := gnuplot.NewPlotter("", false, false)
 	if err != nil {
-		panic(err)
+		err_string := fmt.Sprintf("** err: %v\n", err)
+		panic(err_string)
 	}
-	graph.Title.Text = name
-	graph.X.Label.Text = axisXName
-	graph.Y.Label.Text = axisYName
+	defer plotter.Close()
 
-	graph.X.Min = axisXMin
-	graph.X.Max = axisXMax
-	graph.Y.Min = axisYMin
-	graph.Y.Max = axisYMax
+	plotter.SetStyle("lines")
 
-	return graph
+	for _, functionData := range functions {
+		plotter.PlotFunc(getValues(functionData.InitialN, functionData.EndN, functionData.Step), functionData.Function, functionData.Name)
+	}
+
+	plotter.SetYLabel(axisYName)
+	plotter.SetXLabel(axisXName)
+
+	plotter.CheckedCmd("set terminal png")
+	plotter.CheckedCmd("set key bmargin left horizontal Right noreverse enhanced autotitles box linetype -1 linewidth 1.000")
+	plotter.CheckedCmd("set output './out/" + plotName + ".png'")
+
+	plotter.CheckedCmd("replot")
+	plotter.CheckedCmd("q")
+
+	return
 }
 
-func AddFunctionOnPlot(plot *plot.Plot, function func(n float64) float64, color color.RGBA) {
-	fun := plotter.NewFunction(function)
-	fun.Color = color
-	fun.Width = vg.Points(DEFAULT_LINE_WIDTH)
-	plot.Add(fun)
-}
-
-func AddFunctionOnPlotWithLegend(plot *plot.Plot, function func(n float64) float64, color color.RGBA, functionName string) {
-	fun := plotter.NewFunction(function)
-	fun.Color = color
-	fun.Width = vg.Points(DEFAULT_LINE_WIDTH)
-	plot.Legend.Add(functionName, fun)
-	plot.Add(fun)
-
-	/*if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
+func getValues(initialN float64, endN float64, step float64) []float64 {
+	var n float64
+	var values []float64
+	for n = initialN; n < endN; n += step {
+		values = append(values, n)
 	}
-	defer sdl.Quit()
 
-	window, renderer, err := sdl.CreateWindowAndRenderer(1200, 600, sdl.WINDOW_SHOWN)
-	if err != nil {
-		panic(err)
-	}
-	defer window.Destroy()
-
-	renderer.SetDrawColor(1, 1, 1, 0)
-	renderer.Clear()
-
-	renderer.SetDrawColor(255, 0, 255, 0)
-
-	var values []sdl.Point
-	for idx := 0; idx < 1000; idx++ {
-		values = append(values, sdl.Point{Y: 150 + 3 * int32(function(float64(idx))), X:3 * int32(idx)})
-	}
-	renderer.DrawLines(values)
-
-	renderer.Present()
-
-	sdl.Delay(3000)*/
-}
-
-func SavePlotImage(name string, plot *plot.Plot) error {
-	return plot.Save(4*vg.Inch, 4*vg.Inch, OUT_PATH + name + ".png")
+	return values
 }
