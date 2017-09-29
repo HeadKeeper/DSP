@@ -40,3 +40,14 @@ func GetHarmonicFunction(amplitude float64, frequency float64, soundLength float
 	return func(n float64) float64 {
 		return amplitude * math.Sin(2 * math.Pi * frequency * n / SIGNAL_RATE * soundLength + phi) }
 }
+
+
+func GetValues(initialN float64, endN float64, step float64) []float64 {
+	var n float64
+	var values []float64
+	for n = initialN; n < endN; n += step {
+		values = append(values, n)
+	}
+
+	return values
+}
