@@ -38,6 +38,10 @@ func CreatePlotWithStyle(axisXName string, axisYName string, plotName string, st
 }
 
 func CreateXYPlot(axisXName string, axisYName string, arrayX []float64, arrayY []float64, plotName string)  {
+	CreateXYPlotWithStyle(axisXName, axisYName, arrayX, arrayY, plotName, "lines")
+}
+
+func CreateXYPlotWithStyle(axisXName string, axisYName string, arrayX []float64, arrayY []float64, plotName string, style string) {
 	plotter,err := gnuplot.NewPlotter("", false, false)
 	if err != nil {
 		err_string := fmt.Sprintf("** err: %v\n", err)
@@ -45,7 +49,7 @@ func CreateXYPlot(axisXName string, axisYName string, arrayX []float64, arrayY [
 	}
 	defer plotter.Close()
 
-	plotter.SetStyle("lines")
+	plotter.SetStyle(style)
 
 	plotter.PlotXY(arrayX, arrayY, plotName)
 
