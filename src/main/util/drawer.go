@@ -6,11 +6,11 @@ import (
 	"main/types"
 )
 
-func CreatePlot(axisXName string, axisYName string, plotName string, functions []types.FunctionData)  {
+func CreatePlot(axisXName string, axisYName string, plotName string, functions []types.PlotData)  {
 	CreatePlotWithStyle(axisXName, axisYName, plotName, "lines", functions)
 }
 
-func CreatePlotWithStyle(axisXName string, axisYName string, plotName string, styleName string, functions []types.FunctionData) {
+func CreatePlotWithStyle(axisXName string, axisYName string, plotName string, styleName string, functions []types.PlotData) {
 	plotter,err := gnuplot.NewPlotter("", false, false)
 	if err != nil {
 		err_string := fmt.Sprintf("** err: %v\n", err)

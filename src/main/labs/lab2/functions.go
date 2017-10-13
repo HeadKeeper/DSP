@@ -8,8 +8,8 @@ import (
 
 const K float64 = util.SIGNAL_RATE / 4
 
-func getHarmonicFunction(soundLength float64, phi float64) func(n float64) float64 {
-	return util.GetHarmonicFunction(1, 1, soundLength, phi)
+func getHarmonicFunction(phi float64) func(n float64) float64 {
+	return util.GetHarmonicFunction(1, 1, phi)
 }
 
 func createMArray() []float64 {
@@ -22,19 +22,19 @@ func createMArray() []float64 {
 	return arrayM
 }
 
-func createFunction(soundLength float64) func(n float64) float64 {
+func createFunction() func(n float64) float64 {
 	return func(n float64) float64 {
-		return getHarmonicFunction(soundLength, 0)(n)
+		return getHarmonicFunction(0)(n)
 	}
 }
 
-func createSecondFunction(soundLength float64, phi float64) func(n float64) float64 {
+func createSecondFunction(phi float64) func(n float64) float64 {
 	return func(n float64) float64 {
-		return getHarmonicFunction(soundLength, phi)(n)
+		return getHarmonicFunction(phi)(n)
 	}
 }
 
-func CalculateRootMeanSquareValues(data types.FunctionData) (float64, float64, float64, float64) {
+func CalculateRootMeanSquareValues(data types.PlotData) (float64, float64, float64, float64) {
 	first := calculateRootMeanSquare(data, createFirstRootMeanSquareFunction())
 	firstInaccuracy := calculateRMSInaccuracy(first)
 	second := calculateRootMeanSquare(data, createSecondRootMeanSquareFunction())
@@ -43,7 +43,7 @@ func CalculateRootMeanSquareValues(data types.FunctionData) (float64, float64, f
 	return first, firstInaccuracy, second, secondInaccuracy
 }
 
-func getFNValues(data types.FunctionData) []float64 {
+func getFNValues(data types.PlotData) []float64 {
 	var fnValues []float64
 	for _, currentN := range util.GetValues(data.InitialN, data.EndN, data.Step) {
 		fnValues = append(fnValues, data.Function(currentN))
@@ -52,7 +52,7 @@ func getFNValues(data types.FunctionData) []float64 {
 	return fnValues
 }
 
-func calculateRootMeanSquare(data types.FunctionData, rootMeanSquareFunction func(values []float64) float64) float64 {
+func calculateRootMeanSquare(data types.PlotData, rootMeanSquareFunction func(values []float64) float64) float64 {
 	return rootMeanSquareFunction(getFNValues(data))
 }
 
@@ -77,7 +77,7 @@ func createSecondRootMeanSquareFunction() func(values []float64) float64 {
 }
 
 
-func CalculateAmplitudeValue(data types.FunctionData) (float64, float64) {
+func CalculateAmplitudeValue(data types.PlotData) (float64, float64) {
 	amplitude := math.Sqrt(
 		math.Pow(createAmplitudeFunction(math.Sin)(getFNValues(data)), 2) +
 			math.Pow(createAmplitudeFunction(math.Cos)(getFNValues(data)), 2),

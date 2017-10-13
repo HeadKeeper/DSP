@@ -1,6 +1,6 @@
 package types
 
-type FunctionData struct {
+type PlotData struct {
 	Function func(n float64) float64
 	Name string
 	InitialN float64

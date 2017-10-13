@@ -36,9 +36,9 @@ func EvaluateFormula(formula string, values map[string]interface{}) interface{} 
 	return result
 }
 
-func GetHarmonicFunction(amplitude float64, frequency float64, soundLength float64, phi float64) func(n float64) float64 {
+func GetHarmonicFunction(amplitude float64, frequency float64, phi float64) func(n float64) float64 {
 	return func(n float64) float64 {
-		return amplitude * math.Sin(2 * math.Pi * frequency * n / SIGNAL_RATE * soundLength + phi) }
+		return amplitude * math.Sin(2 * math.Pi * frequency * n / SIGNAL_RATE + phi) }
 }
 
 

@@ -19,21 +19,21 @@ const (
 )
 
 func PerformFirstOption()  {
-	performOption("1", createFunction(float64(util.SOUND_LENGTH)))
+	performOption("1", createFunction())
 }
 
 func PerformSecondOption()  {
-	performOption("2", createSecondFunction(float64(util.SOUND_LENGTH), PHI))
+	performOption("2", createSecondFunction(PHI))
 }
 
 func performOption(optionName string, functionCreator func(n float64) float64)  {
-	var values []types.FunctionData
+	var values []types.PlotData
 
 	fmt.Println("Output for " + LAB_NAME + "_" + optionName)
 	function := functionCreator
 	var statistic []types.SecondLabStat
 	for _, currentM := range createMArray() {
-		currentFunctionData := types.FunctionData {
+		currentFunctionData := types.PlotData{
 			Function: function,
 			Name: "M = " + strconv.Itoa(int(currentM)),
 			InitialN: 0,
@@ -47,7 +47,7 @@ func performOption(optionName string, functionCreator func(n float64) float64)  
 	drawPlotAndMakeSound(optionName, function, values)
 }
 
-func drawPlotAndMakeSound(optionName string, function func(n float64) float64, values []types.FunctionData) {
+func drawPlotAndMakeSound(optionName string, function func(n float64) float64, values []types.PlotData) {
 	util.CreatePlotWithStyle("n", "f(n)", INITIAL_PATH + "_" + optionName, "points", values)
 	util.WriteWAV(INITIAL_PATH + "_" + optionName + SOUND_NAME, util.SOUND_LENGTH, function)
 }
@@ -70,7 +70,7 @@ func drawStatisticData(optionName string, statistic []types.SecondLabStat) {
 	util.CreateXYPlot("M", "Amplitude", arrayM, arrayAmplitude, INITIAL_PATH + "_" + optionName + "_M-Amplitude")
 }
 
-func analyzeData(M float64, data types.FunctionData) types.SecondLabStat {
+func analyzeData(M float64, data types.PlotData) types.SecondLabStat {
 	/*firstRMS*/ _ , firstRMSInaccuracy, _ /*secondRMS*/, secondRMSInaccuracy := CalculateRootMeanSquareValues(data)
 	/*amplitude*/ _ , amplitudeInaccuracy := CalculateAmplitudeValue(data)
 	/*fmt.Println(fmt.Sprintf(
