@@ -4,16 +4,41 @@ import (
 	"main/util"
 	"math"
 	"main/types"
+	"math/cmplx"
 )
 
 const (
-	HARMONICS_AMOUNT int = 111
+	HARMONICS_AMOUNT int = 10
 )
 
 var (
 	AMPLITUDE_VALUES = []float64 {1, 5, 7, 8, 9, 10, 17}
 	PHI_VALUES = []float64{math.Pi / 6, math.Pi / 4, math.Pi / 3, math.Pi / 2, 3 * math.Pi / 4, math.Pi}
 )
+
+func CreateTestSignalFunction() func (index float64) float64 {
+	return func(index float64) float64 {
+		return 50 * math.Cos(2 * math.Pi * index / util.BUFFER_SIZE - math.Pi / 3)
+	}
+}
+
+func CreatePolyharmonicSignalFunction(harmonics []types.Harmonic) func(index float64) float64 {
+	return func(index float64) float64 {
+		var sum float64
+		for j := 0; j < len(harmonics); j ++ {
+			sum += harmonics[j].Amplitude * math.Cos(2 * math.Pi * float64(j) * index / util.BUFFER_SIZE - harmonics[j].Phi)
+		}
+		return sum
+	}
+}
+
+func CreateSignal(signalFunction func(x float64) float64) []float64 {
+	var signal []float64
+	for idx := 0.0; idx < util.BUFFER_SIZE; idx += 1 {
+		signal = append(signal, signalFunction(idx))
+	}
+	return signal
+}
 
 func CreateHarmonics() []types.Harmonic {
 	var harmonics []types.Harmonic
@@ -26,141 +51,73 @@ func CreateHarmonics() []types.Harmonic {
 	return harmonics
 }
 
-func CalculateAmplitudesAndPhi(amount int, harmonicNumber float64) (float64, float64, float64, float64) {
-	getAmplitudeCos := createAmplitudeFunction(float64(amount), math.Cos)
-	getAmplitudeSin := createAmplitudeFunction(float64(amount), math.Sin)
-
-	amplitudeC := getAmplitudeCos(int(harmonicNumber))
-	amplitudeS := getAmplitudeSin(int(harmonicNumber))
-
-	amplitude := math.Sqrt(
-		math.Pow(amplitudeC, 2) +
-		math.Pow(amplitudeS, 2),
-	)
-
-	phi := math.Atan(amplitudeS / amplitudeC)
-
-	return amplitudeC, amplitudeS, amplitude, phi
-}
-
-
-func CalculateAmplitudesAndPhiForCreatedSignal(harmonicNumber int, amount float64, values []float64) (float64, float64, float64, float64) {
-	getAmplitudeCos := createAmplitudeFunctionForCreatedSignal(amount, math.Cos, values)
-	getAmplitudeSin := createAmplitudeFunctionForCreatedSignal(amount, math.Sin, values)
-
-	amplitudeC := getAmplitudeCos(harmonicNumber)
-	amplitudeS := getAmplitudeSin(harmonicNumber)
-
-	amplitude := math.Sqrt(
-		math.Pow(amplitudeC, 2) +
-			math.Pow(amplitudeS, 2),
-	)
-
-	phi := math.Atan(amplitudeS / amplitudeC)
-
-	return amplitudeC, amplitudeS, amplitude, phi
-}
-
-
-func createAmplitudeFunction(amount float64, fun func(x float64) float64) func(harmonicNumber int) float64 {
-	createTestSignal := CreateTestSignalFunction()
-	var values []float64
-	for index := 0; index < int(amount); index ++ {
-		values = append(values, createTestSignal(float64(index), amount))
-	}
-	return createAmplitudeFunctionForCreatedSignal(amount, fun, values)
-}
-
-func createAmplitudeFunctionForCreatedSignal(amount float64, fun func(x float64) float64, values []float64) func(harmonicNumber int) float64 {
-	return func(harmonicNumber int) float64 {
-		var sum float64
-		for idx := 0; idx < int(amount); idx++ {
-			sum += values[idx] * fun(2 * math.Pi * float64(idx) * float64(harmonicNumber) / amount)
-		}
-
-		return sum * 2 / amount
-	}
-}
-
-func getRanges(amount float64) ([]float64, []float64, []float64) {
-	var phasesRange []float64
-	var amplitudesRange []float64
-	var amountRange []float64
-
-	harmonics := CreateHarmonics()
-	for index := range harmonics {
-		/*amplitudeC, amplitudeS, */_, _, amplitude, phi := CalculateAmplitudesAndPhi(index, amount)
-
-		amountRange = append(amountRange, float64(index+1))
-		phasesRange = append(phasesRange, phi)
-		amplitudesRange = append(amplitudesRange, amplitude)
-	}
-
-	return amountRange, phasesRange, amplitudesRange
-}
-
-func getRangesForCreatedSignal(amount float64, values []float64, harmonics []types.Harmonic) ([]float64, []float64, []float64) {
-	var phasesRange []float64
-	var amplitudesRange []float64
-	var amountRange []float64
-
-	for index := range harmonics {
-		_, _, amplitude, phi := CalculateAmplitudesAndPhiForCreatedSignal(index, amount, values)
-
-		amountRange = append(amountRange, float64(index+1))
-		phasesRange = append(phasesRange, phi)
-		amplitudesRange = append(amplitudesRange, amplitude)
-	}
-
-	return amountRange, phasesRange, amplitudesRange
-}
-
-func CreateTestSignalFunction() func (index float64, amount float64) float64 {
-	return func(index float64, amount float64) float64 {
-		return 50 * math.Cos(2 * math.Pi * index / amount - math.Pi / 3)
-	}
-}
-
-func CreatePolyharmonicSignalFunction() func(index float64, harmonics []types.Harmonic) float64 {
-	return func(index float64, harmonics []types.Harmonic) float64 {
-		var sum float64
-		var amount = float64(len(harmonics))
-
-		for j := 0; j < len(harmonics); j ++ {
-			sum += harmonics[j].Amplitude * math.Cos(2 * math.Pi * float64(j) * index / amount - harmonics[j].Phi)
-		}
-		return sum
-	}
-}
-
-func getSignalValues(amount float64, harmonics []types.Harmonic, createSignal func(x float64, harmonics []types.Harmonic) float64) ([]float64, []float64) {
-	var values []float64
+func Fourier(signal []float64) ([]float64, []float64, []float64) {
+	length := len(signal)
+	var beginPhases []float64
+	var amplitudes []float64
 	var indexes []float64
 
-	for index := 0.0; index < amount; index+=1 {
-		values = append(values, createSignal(index, harmonics))
-		indexes = append(indexes, index)
+	for i := 0; i < length; i++ {
+		amplitudeS := 0.0
+		amplitudeC := 0.0
+		for j := 0; j < length; j++ {
+			w := 2 * math.Pi * float64(j) * float64(i) / float64(length)
+
+			amplitudeS += signal[j] * math.Sin(w)
+			amplitudeC += signal[j] * math.Cos(w)
+
+		}
+		amplitudeS *= 2 / float64(length)
+		amplitudeC *= 2 / float64(length)
+
+		beginPhases = append(beginPhases, math.Atan2(amplitudeS, amplitudeC))
+		amplitudes = append(amplitudes, math.Hypot(amplitudeS, amplitudeC))
+		indexes = append(indexes, float64(i))
 	}
 
-	return values, indexes
+	return indexes, amplitudes, beginPhases
 }
 
-func RestoreSignalByRanges(amplitudeRanges []float64, phaseRanges []float64, amount int) func(x float64) float64 {
-	return func(x float64) float64 {
-		var sum float64
-		for j := 0; j < amount / 2; j++ {
-			sum += amplitudeRanges[j] * math.Cos( 2 * math.Pi * float64(j) * x / float64(amount) - phaseRanges[j])
-		}
-		return sum
+func FastFourierTransform(signal []float64, complexSignal []complex128, s int) []complex128 {
+	//complexSignal := make([]complex128, len(signal))
+	bufferSize := len(signal)
+
+	FastFourierTransform(signal, complexSignal, 2 * s)
+	FastFourierTransform(signal[s:], complexSignal, 2 * s)
+
+	for k := 0; k < bufferSize / 2; k ++ {
+		tf := cmplx.Rect(1, -2 * math.Pi * float64(k) / float64(bufferSize)) * complexSignal[k + bufferSize / 2]
+		complexSignal[k], complexSignal[k + bufferSize / 2] = complexSignal[k] + tf, complexSignal[k] - tf
 	}
+
+	return complexSignal
 }
 
-func RestorePolyharmonicSignalByRanges(amplitudeRanges []float64, phaseRanges []float64, amount int) func(x float64) float64  {
-	return func(x float64) float64 {
+func RestoreSignal(amplitudeRanges []float64, phaseRanges []float64) []float64 {
+	amount := int(util.BUFFER_SIZE)
+	var signal []float64
+
+	for i := 0; i < amount; i ++ {
 		var sum float64
 		for j := 0; j < amount / 2; j++ {
-			sum += amplitudeRanges[j] * math.Cos( 2 * math.Pi * float64(j) * x / float64(amount) - phaseRanges[j])
+			sum += amplitudeRanges[j] * math.Cos( 2 * math.Pi * float64(j) * float64(i) / float64(amount) - phaseRanges[j])
 		}
-		return sum
+		signal = append(signal, sum)
 	}
+	return signal
+}
+
+func RestorePolyharmonicSignal(amplitudeRanges []float64, phaseRanges []float64) []float64  {
+	amount := int(util.BUFFER_SIZE)
+	var signal []float64
+
+	for i := 0; i < amount; i ++ {
+		var sum float64
+		for j := 1; j < amount / 2 - 1; j++ {
+			sum += amplitudeRanges[j] * math.Cos( 2 * math.Pi * float64(j) * float64(i) / float64(amount) - phaseRanges[j])
+		}
+		sum += amplitudeRanges[0] / 2
+		signal = append(signal, sum)
+	}
+	return signal
 }

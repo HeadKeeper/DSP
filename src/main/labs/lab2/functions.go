@@ -91,9 +91,7 @@ func createAmplitudeFunction(fun func(x float64) float64) func(values []float64)
 	return func(values []float64) float64 {
 		var sum float64
 		for idx, value := range values {
-			if idx != len(values) {
-				sum += value * fun(2 * math.Pi * float64(idx) / float64(len(values)))
-			}
+			sum += value * fun(2 * math.Pi * float64(idx) / float64(len(values)))
 		}
 
 		return 2 / float64(len(values)) * sum

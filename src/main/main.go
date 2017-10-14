@@ -10,9 +10,9 @@ import (
 /* Variant 6 */
 
 func main() {
-	performFirstLab()
+	//performFirstLab()
 	//performSecondLab()
-	//performThirdLab()
+	performThirdLab()
 	//performFourthLab()
 }
 
@@ -28,7 +28,7 @@ func performSecondLab()  {
 }
 
 func performThirdLab() {
-	//lab3.PerformFirstOption()
+	lab3.PerformFirstOption()
 	lab3.PerformSecondOption()
 }
 

@@ -10,10 +10,9 @@ import (
 
 const (
 	LAB_NAME = "lab2"
-	OUT_PATH string = "_out"
 	SOUND_NAME string = "_sound"
 
-	INITIAL_PATH string = LAB_NAME + OUT_PATH
+	INITIAL_PATH string = LAB_NAME
 
 	PHI float64 = math.Pi / 2
 )
@@ -30,11 +29,10 @@ func performOption(optionName string, functionCreator func(n float64) float64)  
 	var values []types.PlotData
 
 	fmt.Println("Output for " + LAB_NAME + "_" + optionName)
-	function := functionCreator
 	var statistic []types.SecondLabStat
 	for _, currentM := range createMArray() {
 		currentFunctionData := types.PlotData{
-			Function: function,
+			Function: functionCreator,
 			Name: "M = " + strconv.Itoa(int(currentM)),
 			InitialN: 0,
 			EndN: currentM,
@@ -44,7 +42,7 @@ func performOption(optionName string, functionCreator func(n float64) float64)  
 		statistic = append(statistic, analyzeData(currentM, currentFunctionData))
 	}
 	drawStatisticData(optionName, statistic)
-	drawPlotAndMakeSound(optionName, function, values)
+	drawPlotAndMakeSound(optionName, functionCreator, values)
 }
 
 func drawPlotAndMakeSound(optionName string, function func(n float64) float64, values []types.PlotData) {
@@ -65,24 +63,35 @@ func drawStatisticData(optionName string, statistic []types.SecondLabStat) {
 		arrayAmplitude = append(arrayAmplitude, currentData.AmplitudeInaccuracy)
 	}
 
-	util.CreateXYPlot("M", "RMS1", arrayM, arrayRMS1, INITIAL_PATH + "_" + optionName + "_M-RMS1")
-	util.CreateXYPlot("M", "RMS2", arrayM, arrayRMS2, INITIAL_PATH + "_" + optionName + "_M-RMS2")
-	util.CreateXYPlot("M", "Amplitude", arrayM, arrayAmplitude, INITIAL_PATH + "_" + optionName + "_M-Amplitude")
+	util.CreateXYPlotWithStyle(
+		"M",
+		"RMS1",
+		arrayM,
+		arrayRMS1,
+		INITIAL_PATH + "_" + optionName + "_M-RMS1",
+		"impulses",
+	)
+	util.CreateXYPlotWithStyle(
+		"M",
+		"RMS2",
+		arrayM,
+		arrayRMS2,
+		INITIAL_PATH + "_" + optionName + "_M-RMS2",
+		"impulses",
+	)
+	util.CreateXYPlotWithStyle(
+		"M",
+		"Amplitude",
+		arrayM,
+		arrayAmplitude,
+		INITIAL_PATH + "_" + optionName + "_M-Amplitude",
+		"impulses",
+	)
 }
 
 func analyzeData(M float64, data types.PlotData) types.SecondLabStat {
 	/*firstRMS*/ _ , firstRMSInaccuracy, _ /*secondRMS*/, secondRMSInaccuracy := CalculateRootMeanSquareValues(data)
 	/*amplitude*/ _ , amplitudeInaccuracy := CalculateAmplitudeValue(data)
-	/*fmt.Println(fmt.Sprintf(
-		"M: %v\n\t" +
-		"First RMS: %v (Inaccuracy: %v)\n\t" +
-		"SecondRMS: %v (Inaccuracy: %v)\n\t" +
-		"Amplitude: %v (Inaccuracy: %v)\n",
-		M,
-		firstRMS, firstRMSInaccuracy,
-		secondRMS, secondRMSInaccuracy,
-		amplitude, amplitudeInaccuracy,
-	))*/
 	return types.SecondLabStat{
 		M                  : M,
 		RMSFirstInaccuracy : firstRMSInaccuracy,

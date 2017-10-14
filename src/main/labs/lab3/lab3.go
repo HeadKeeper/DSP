@@ -5,58 +5,54 @@ import (
 )
 
 const (
-	OUTPUT_NAME     string = "lab3_out_"
-	OUTPUT_1_A_NAME string = OUTPUT_NAME + "1_a_range_"
+	OUTPUT_NAME     string = "lab3_"
+	OUTPUT_1_A_NAME string = OUTPUT_NAME + "1_a_"
 	OUTPUT_1_B_NAME string = OUTPUT_NAME + "1_b_"
 	OUTPUT_2_A_NAME string = OUTPUT_NAME + "2_a_"
 	OUTPUT_2_B_NAME string = OUTPUT_NAME + "2_b_"
-
-	AMOUNT = util.SIGNAL_RATE * util.SOUND_LENGTH
 )
 
 func PerformFirstOption() {
-	amountRange, phasesRange, amplitudesRange := getRanges(AMOUNT)
+	signal := CreateSignal(CreateTestSignalFunction())
+	amountRange, amplitudesRange, phasesRange := Fourier(signal)
+
 	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_1_A_NAME)
-	showDifferenceOriginAndRestoredSignal(amountRange, phasesRange, amplitudesRange)
-}
 
-func showRanges(amountRange []float64, phasesRange []float64, amplitudesRange []float64, outputName string) {
-	util.CreateXYPlotWithStyle("k", "Phases", amountRange, phasesRange, outputName + "phases", "impulses")
-	util.CreateXYPlotWithStyle("k", "Amplitudes", amountRange, amplitudesRange, outputName + "amplitudes", "impulses")
-}
-
-func showDifferenceOriginAndRestoredSignal(amountRange []float64, phasesRange []float64, amplitudesRange []float64) {
-	createTestSignal := CreateTestSignalFunction()
-	restoreSignal := RestoreSignalByRanges(amplitudesRange, phasesRange, len(amountRange))
-
-	var testSignalOrigin []float64
-	var testSignalRestored []float64
-	for index := 0; index < len(amountRange); index ++ {
-		testSignalOrigin = append(testSignalOrigin, createTestSignal(float64(index), float64(len(amountRange))))
-		testSignalRestored = append(testSignalRestored, restoreSignal(float64(index)))
-	}
-
-	util.CreateXYPlot("i", "x(i)", amountRange, testSignalOrigin, OUTPUT_1_B_NAME + "original_signal")
-	util.CreateXYPlot("i", "x(i)", amountRange, testSignalRestored, OUTPUT_1_B_NAME + "restored_signal")
+	restoredSignal := RestoreSignal(amplitudesRange, phasesRange)
+	showDifferenceOriginAndRestoredSignal(signal, restoredSignal, amountRange, OUTPUT_1_B_NAME)
 }
 
 func PerformSecondOption() {
 	harmonics := CreateHarmonics()
-	createSignal := CreatePolyharmonicSignalFunction()
+	signal := CreateSignal(CreatePolyharmonicSignalFunction(harmonics))
+	amountRange, amplitudesRange, phasesRange := Fourier(signal)
 
-	values, _ := getSignalValues(AMOUNT, harmonics, createSignal)
-	amountRange, phasesRange, amplitudesRange := getRangesForCreatedSignal(AMOUNT, values, harmonics)
 	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_2_A_NAME)
 
-	restoreSignal := RestorePolyharmonicSignalByRanges(amplitudesRange, phasesRange, len(amountRange))
+	restoredSignal := RestorePolyharmonicSignal(amplitudesRange, phasesRange)
+	showDifferenceOriginAndRestoredSignal(signal, restoredSignal, amountRange, OUTPUT_2_B_NAME)
+}
 
-	var testSignalOrigin []float64
-	var testSignalRestored []float64
-	for index := 0; index < len(amountRange); index ++ {
-		testSignalOrigin = append(testSignalOrigin, createSignal(float64(index), harmonics))
-		testSignalRestored = append(testSignalRestored, restoreSignal(float64(index)))
-	}
+func showRanges(amountRange []float64, phasesRange []float64, amplitudesRange []float64, outputName string) {
+	util.CreateXYPlotWithStyle(
+		"k",
+		"Phases",
+		amountRange,
+		phasesRange,
+		outputName + "phases",
+		"impulses",
+	)
+	util.CreateXYPlotWithStyle(
+		"k",
+		"Amplitudes",
+		amountRange,
+		amplitudesRange,
+		outputName + "amplitudes",
+		"impulses",
+	)
+}
 
-	util.CreateXYPlot("i", "x(i)", amountRange, testSignalOrigin, OUTPUT_2_B_NAME + "original_signal")
-	util.CreateXYPlot("i", "x(i)", amountRange, testSignalRestored, OUTPUT_2_B_NAME + "restored_signal")
+func showDifferenceOriginAndRestoredSignal(originSignal []float64, restoredSignal []float64, amountRange []float64, plotName string) {
+	util.CreateXYPlot("i", "x(i)", amountRange, originSignal, plotName + "original_signal")
+	util.CreateXYPlot("i", "x(i)", amountRange, restoredSignal, plotName + "restored_signal")
 }

@@ -7,13 +7,12 @@ import (
 )
 
 const (
-	LAB_NAME = "lab1"
-	OUT_PATH string ="_out"
+	LAB_NAME = "lab1_"
 	SOUND_NAME string = "_sound"
 
-	FIRST_OPTION__PATH string = LAB_NAME + OUT_PATH + "_1_"
-	SECOND_OPTION__PATH string = LAB_NAME + OUT_PATH + "_2"
-	THIRD_OPTION__PATH string = LAB_NAME + OUT_PATH + "_3"
+	FIRST_OPTION__PATH string = LAB_NAME + "1_"
+	SECOND_OPTION__PATH string = LAB_NAME + "2"
+	THIRD_OPTION__PATH string = LAB_NAME + "3"
 
 	THIRD_OPTION__AMOUNT_CYCLES = 5
 )
