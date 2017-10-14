@@ -4,47 +4,42 @@ import (
 	"math"
 	"main/util"
 	"main/types"
-	"sort"
+	"math/cmplx"
 )
 
 const (
 	B1 = 10000.0
 	B2 = 1.0
 	HARMONICS_AMOUNT = 20
-
-	MOVING_AVERAGE__K = 5
-	MEDIAN_FILTER__N  = 9
 )
 
 var (
 	EPSYLON_VALUES = []float64 { 1.0, 0.0 }
 )
 
-func CreateSignalFunction(amount float64) func(x float64) float64 {
+func CreateSignalFunction() func(x float64) float64 {
 	return func(x float64) float64 {
-		result := B1 * math.Sin(2 * math.Pi * x / amount)
+		result := B1 * math.Sin(2 * math.Pi * x / util.BUFFER_SIZE)
 		var sum float64
 		for index := 50; index < 70; index++ {
-			sum += math.Pow(-1, util.GetRandomValue(EPSYLON_VALUES)) * B2 * math.Sin(2 * math.Pi * x * float64(index) / amount)
+			sum += math.Pow(-1, util.GetRandomValue(EPSYLON_VALUES)) * B2 * math.Sin(2 * math.Pi * x * float64(index) / util.BUFFER_SIZE)
 		}
 
 		return result + sum
 	}
 }
 
-func getSignalValues(createSignal func(x float64) float64) ([]float64, []float64) {
-	var values []float64
+func CreateSignal(signalFunction func(x float64) float64) ([]float64, []float64) {
+	var signal []float64
 	var indexes []float64
-
-	for index := 0.0; index < AMOUNT; index+=1 {
-		values = append(values, createSignal(index))
-		indexes = append(indexes, index)
+	for idx := 0.0; idx < util.BUFFER_SIZE; idx += 1 {
+		signal = append(signal, signalFunction(idx))
+		indexes = append(indexes, idx)
 	}
-
-	return values, indexes
+	return indexes, signal
 }
 
-func CreateHarmonicsForSignal() []types.Harmonic {
+func CreateHarmonics() []types.Harmonic {
 	var harmonics []types.Harmonic
 	initialHarmonic := types.Harmonic {
 		Amplitude: B1,
@@ -60,218 +55,73 @@ func CreateHarmonicsForSignal() []types.Harmonic {
 	return harmonics
 }
 
-func CalculateAmplitudesAndPhi(harmonicNumber int, amount float64) (float64, float64, float64, float64) {
-	getAmplitudeCos := createAmplitudeFunction(amount, math.Cos)
-	getAmplitudeSin := createAmplitudeFunction(amount, math.Sin)
+func Fourier(signal []float64) ([]float64, []float64, []float64) {
+	length := len(signal)
+	var beginPhases []float64
+	var amplitudes []float64
+	var indexes []float64
 
-	amplitudeC := getAmplitudeCos(harmonicNumber)
-	amplitudeS := getAmplitudeSin(harmonicNumber)
+	for i := 0; i < length; i++ {
+		amplitudeS := 0.0
+		amplitudeC := 0.0
+		for j := 0; j < length; j++ {
+			w := 2 * math.Pi * float64(j) * float64(i) / float64(length)
 
-	amplitude := math.Sqrt(
-		math.Pow(amplitudeC, 2) +
-		math.Pow(amplitudeS, 2),
-	)
+			amplitudeS += signal[j] * math.Sin(w)
+			amplitudeC += signal[j] * math.Cos(w)
 
-	phi := math.Atan(amplitudeS / amplitudeC)
-
-	return amplitudeC, amplitudeS, amplitude, phi
-}
-
-func CalculateAmplitudesAndPhiForCreatedSignal(harmonicNumber int, amount float64, values []float64) (float64, float64, float64, float64) {
-	getAmplitudeCos := createAmplitudeFunctionForCreatedSignal(amount, math.Cos, values)
-	getAmplitudeSin := createAmplitudeFunctionForCreatedSignal(amount, math.Sin, values)
-
-	amplitudeC := getAmplitudeCos(harmonicNumber)
-	amplitudeS := getAmplitudeSin(harmonicNumber)
-
-	amplitude := math.Sqrt(
-		math.Pow(amplitudeC, 2) +
-			math.Pow(amplitudeS, 2),
-	)
-
-	phi := math.Atan(amplitudeS / amplitudeC)
-
-	return amplitudeC, amplitudeS, amplitude, phi
-}
-
-
-func createAmplitudeFunction(amount float64, fun func(x float64) float64) func(harmonicNumber int) float64 {
-	createTestSignal := CreateSignalFunction(amount)
-	var values []float64
-	for index := 0; index < int(amount); index ++ {
-		values = append(values, createTestSignal(float64(index)))
-	}
-	return createAmplitudeFunctionForCreatedSignal(amount, fun, values)
-}
-
-func createAmplitudeFunctionForCreatedSignal(amount float64, fun func(x float64) float64, values []float64) func(harmonicNumber int) float64 {
-	return func(harmonicNumber int) float64 {
-		var sum float64
-		for idx := 0; idx < int(amount); idx++ {
-			sum += values[idx] * fun(2 * math.Pi * float64(idx) * float64(harmonicNumber) / amount)
 		}
+		amplitudeS *= 2 / float64(length)
+		amplitudeC *= 2 / float64(length)
 
-		return sum * 2 / amount
+		beginPhases = append(beginPhases, math.Atan2(amplitudeS, amplitudeC))
+		amplitudes = append(amplitudes, math.Hypot(amplitudeS, amplitudeC))
+		indexes = append(indexes, float64(i))
 	}
+
+	return indexes, amplitudes, beginPhases
 }
 
-func getRanges(amount float64) ([]float64, []float64, []float64) {
-	var phasesRange []float64
-	var amplitudesRange []float64
-	var amountRange []float64
+func FastFourierTransform(signal []float64, complexSignal []complex128, s int) []complex128 {
+	//complexSignal := make([]complex128, len(signal))
+	bufferSize := len(signal)
 
-	harmonics := CreateHarmonicsForSignal()
-	for index := range harmonics {
-		/*amplitudeC, amplitudeS, */_, _, amplitude, phi := CalculateAmplitudesAndPhi(index, amount)
+	FastFourierTransform(signal, complexSignal, 2 * s)
+	FastFourierTransform(signal[s:], complexSignal, 2 * s)
 
-		amountRange = append(amountRange, float64(index+1))
-		phasesRange = append(phasesRange, phi)
-		amplitudesRange = append(amplitudesRange, amplitude)
+	for k := 0; k < bufferSize / 2; k ++ {
+		tf := cmplx.Rect(1, -2 * math.Pi * float64(k) / float64(bufferSize)) * complexSignal[k + bufferSize / 2]
+		complexSignal[k], complexSignal[k + bufferSize / 2] = complexSignal[k] + tf, complexSignal[k] - tf
 	}
 
-	return amountRange, phasesRange, amplitudesRange
+	return complexSignal
 }
 
-func getRangesForCreatedSignal(amount float64, values []float64) ([]float64, []float64, []float64) {
-	var phasesRange []float64
-	var amplitudesRange []float64
-	var amountRange []float64
+func RestoreSignal(amplitudeRanges []float64, phaseRanges []float64) []float64 {
+	amount := int(util.BUFFER_SIZE)
+	var signal []float64
 
-	harmonics := CreateHarmonicsForSignal()
-	for index := range harmonics {
-		_, _, amplitude, phi := CalculateAmplitudesAndPhiForCreatedSignal(index, amount, values)
-
-		amountRange = append(amountRange, float64(index+1))
-		phasesRange = append(phasesRange, phi)
-		amplitudesRange = append(amplitudesRange, amplitude)
+	for i := 0; i < amount; i ++ {
+		var sum float64
+		for j := 0; j < amount / 2; j++ {
+			sum += amplitudeRanges[j] * math.Cos( 2 * math.Pi * float64(j) * float64(i) / float64(amount) - phaseRanges[j])
+		}
+		signal = append(signal, sum)
 	}
-
-	return amountRange, phasesRange, amplitudesRange
+	return signal
 }
 
-func filterByMovingAverageAlgorithm(values []float64) []float64 {
-	var newValues []float64
+func RestorePolyharmonicSignal(amplitudeRanges []float64, phaseRanges []float64) []float64  {
+	amount := int(util.BUFFER_SIZE)
+	var signal []float64
 
-	m := int((MOVING_AVERAGE__K - 1) / 2)
-
-	for index := range values {
-		newValues = append(newValues, getXByMovingAverage(index, m, MOVING_AVERAGE__K, values))
+	for i := 0; i < amount; i ++ {
+		var sum float64
+		for j := 1; j < amount / 2 - 1; j++ {
+			sum += amplitudeRanges[j] * math.Cos( 2 * math.Pi * float64(j) * float64(i) / float64(amount) - phaseRanges[j])
+		}
+		sum += amplitudeRanges[0] / 2
+		signal = append(signal, sum)
 	}
-
-	return newValues
-}
-
-func getXByMovingAverage(i int, m int, K int, values []float64) float64 {
-	var sum float64
-	startEdge := i - m
-	endEdge := i + m
-
-	if startEdge < 0 {
-		startEdge = 0
-	}
-	if endEdge >= len(values) {
-		endEdge = len(values)
-	}
-
-	for index := startEdge; index < endEdge; index++ {
-		sum += values[index]
-	}
-
-	return sum / float64(K)
-}
-
-func filterByParabolaAlgorithm(values []float64) []float64 {
-	var newValues []float64
-
-	for index := range values {
-		newValues = append(newValues, getXByParabolaEleven(index, values))
-	}
-
-	return newValues
-}
-
-func getXByParabolaEleven(i int, values []float64) float64 {
-	var sum float64
-	var sumCoeff float64
-
-	length := len(values)
-
-	if i - 5 > 0 {
-		sum += 18 * values[i-5]
-		sumCoeff += 18
-	}
-	if i - 4 > 0 {
-		sum -= 45 * values[i-4]
-		sumCoeff -= 45
-	}
-	if i - 3 > 0 {
-		sum -= 10 * values[i-3]
-		sumCoeff -= 10
-	}
-	if i - 2 > 0 {
-		sum += 60 * values[i-2]
-		sumCoeff += 60
-	}
-	if i - 1 > 0 {
-		sum += 120 * values[i-1]
-		sumCoeff += 120
-	}
-	sum += 143 * values[i]
-	sumCoeff += 143
-	if i + 1 < length {
-		sum += 120 * values[i+1]
-		sumCoeff += 120
-	}
-	if i + 2 < length {
-		sum += 60 * values[i+2]
-		sumCoeff += 60
-	}
-	if i + 3 < length {
-		sum -= 10 * values[i+3]
-		sumCoeff -= 10
-	}
-	if i + 4 < length {
-		sum -= 45 * values[i+4]
-		sumCoeff -= 45
-	}
-	if i + 5 < length {
-		sum += 18 * values[i+5]
-		sumCoeff += 18
-	}
-
-	return sum / sumCoeff
-}
-
-func filterByMedianFilterAlgorithm(values []float64) []float64 {
-	var newValues []float64
-
-	for index := range values {
-		newValues = append(newValues, getXByMedianFilter(index, values))
-	}
-
-	return newValues
-}
-
-func getXByMedianFilter(i int, values []float64) float64 {
-	n := int(MEDIAN_FILTER__N / 2)
-
-	startEdge := i - n
-	endEdge := i + n
-
-	if startEdge < 0 {
-		startEdge = 0
-	}
-	if endEdge >= len(values) {
-		endEdge = len(values)
-	}
-
-	var currentWindow []float64
-	for index := startEdge; index < endEdge; index ++ {
-		currentWindow = append(currentWindow, values[index])
-	}
-
-	sort.Float64s(currentWindow)
-	targetIndex := int(len(currentWindow) / 2)
-
-	return currentWindow[targetIndex]
+	return signal
 }

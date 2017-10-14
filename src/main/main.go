@@ -12,8 +12,8 @@ import (
 func main() {
 	//performFirstLab()
 	//performSecondLab()
-	performThirdLab()
-	//performFourthLab()
+	//performThirdLab()
+	performFourthLab()
 }
 
 func performFirstLab() {
