@@ -26,11 +26,20 @@ func PerformSecondOption() {
 	harmonics := CreateHarmonics()
 	signal := CreateSignal(CreatePolyharmonicSignalFunction(harmonics))
 	amountRange, amplitudesRange, phasesRange := Fourier(signal)
-
 	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_2_A_NAME)
 
 	restoredSignal := RestorePolyharmonicSignal(amplitudesRange, phasesRange)
 	showDifferenceOriginAndRestoredSignal(signal, restoredSignal, amountRange, OUTPUT_2_B_NAME)
+
+	amplitudesRange, phasesRange = util.FilterValues(util.LOW_PASS_FILTER, amplitudesRange, phasesRange, []float64{11})
+	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_2_A_NAME + "filtered_by_low_pass_")
+
+	amplitudesRange, phasesRange = util.FilterValues(util.HIGH_PASS_FILTER, amplitudesRange, phasesRange, []float64{6})
+	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_2_A_NAME + "filtered_by_high_pass_")
+
+	amplitudesRange, phasesRange = util.FilterValues(util.BAND_PASS_FILTER, amplitudesRange, phasesRange, []float64{11, 6,  35, 45})
+	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_2_A_NAME + "filtered_by_band_pass_")
+
 }
 
 func showRanges(amountRange []float64, phasesRange []float64, amplitudesRange []float64, outputName string) {
