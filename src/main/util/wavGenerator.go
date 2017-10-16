@@ -17,6 +17,14 @@ const (
 )
 
 func WriteWAV(name string, soundLength int, function func(n float64) float64) {
+	var signal []float64
+	for n := 0; n < DEFAULT_RATE; n++ {
+		signal = append(signal, function(float64(n)))
+	}
+	WriteWAVForSignal(name, soundLength, signal)
+}
+
+func WriteWAVForSignal(name string, soundLength int, signal []float64) {
 	wavOut, err := os.Create(DEFAULT_OUT_PATH + name + ".wav")
 	checkErr(err)
 	defer wavOut.Close()
@@ -31,13 +39,14 @@ func WriteWAV(name string, soundLength int, function func(n float64) float64) {
 	checkErr(err)
 	defer writer.Close()
 
-	for n := 0; n < soundLength / 2 * DEFAULT_RATE; n++ {
-		funRes := int32(
-			math.Pow(2, DEFAULT_BITS-1) *
-			function(float64(n)),
-		)
-
-		err := writer.WriteInt32(funRes)
+	for n := 0; n < soundLength / 2; n++ {
+		for idx := range signal {
+			funRes := int32(
+				math.Pow(2, DEFAULT_BITS-1) *
+				signal[idx],
+			)
+			writer.WriteInt32(funRes)
+		}
 		checkErr(err)
 	}
 

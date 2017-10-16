@@ -7,7 +7,7 @@ import (
 const (
 	// w = 2 * Pi * f - angular speed of rotation
 	// phase = (2 * Pi * f * x) / N) * soundLength + initialAngle
-	SIGNAL_RATE float64 = 512
+	SIGNAL_RATE float64 = 2048
 	SOUND_LENGTH = 15
 	BUFFER_SIZE float64 = SIGNAL_RATE
 )

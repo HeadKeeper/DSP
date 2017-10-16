@@ -16,9 +16,7 @@ func PerformFirstOption() {
 	indexes, signal := CreateSignal(CreateSignalFunction())
 
 	util.CreateXYPlot("i", "x(i)", indexes, signal, OUTPUT_1_NAME + "signal")
-	/*
-	util.WriteWAV(OUTPUT_1_NAME + "signal_sound", util.SOUND_LENGTH, createSignal)
-	*/
+	util.WriteWAVForSignal(OUTPUT_1_NAME + "signal_sound", util.SOUND_LENGTH, signal)
 }
 
 func PerformSecondOption() {
@@ -48,18 +46,22 @@ func PerformThirdOption() {
 
 func PerformFourthOption() {
 	_, signal := CreateSignal(CreateSignalFunction())
+	util.WriteWAVForSignal(OUTPUT_4_NAME + "signal_sound", util.SOUND_LENGTH, signal)
 
 	newSignalByMovingAverage := util.FilterByMovingAverageAlgorithm(signal)
 	amountRange, amplitudesRange, phasesRange := Fourier(newSignalByMovingAverage)
 	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_4_NAME + "moving_average_")
+	util.WriteWAVForSignal(OUTPUT_4_NAME + "moving_average_signal_sound", util.SOUND_LENGTH, newSignalByMovingAverage)
 
 	newSignalByParabola := util.FilterByParabolaAlgorithm(signal)
 	amountRange, amplitudesRange, phasesRange = Fourier(newSignalByParabola)
 	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_4_NAME + "parabola_")
+	util.WriteWAVForSignal(OUTPUT_4_NAME + "parabola_signal_sound", util.SOUND_LENGTH, newSignalByParabola)
 
 	newSignalByMedianFilter := util.FilterByMedianFilterAlgorithm(signal)
 	amountRange, amplitudesRange, phasesRange = Fourier(newSignalByMedianFilter)
 	showRanges(amountRange, phasesRange, amplitudesRange, OUTPUT_4_NAME + "median_")
+	util.WriteWAVForSignal(OUTPUT_4_NAME + "median_signal_sound", util.SOUND_LENGTH, newSignalByMedianFilter)
 }
 
 func showRanges(amountRange []float64, phasesRange []float64, amplitudesRange []float64, outputName string) {
