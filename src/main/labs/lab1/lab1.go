@@ -29,14 +29,15 @@ func makeFirstOptionSub(subName string, values []float64, createFunction func(x 
 
 	for index, element := range values {
 		function := createFunction(element)
-		functionsData = append(functionsData, types.PlotData{
+		functionData := types.PlotData{
 			Function: function,
 			Name: strconv.Itoa(index),
 			InitialN: 0,
-			EndN: 200,
-			Step: 0.001,
-		})
-		util.WriteWAV(FIRST_OPTION__PATH + subName + SOUND_NAME + "_" + strconv.Itoa(index + 1), util.SOUND_LENGTH, function)
+			EndN: 50000,
+			Step: 1,
+		}
+		functionsData = append(functionsData, functionData)
+		util.WriteWAV(FIRST_OPTION__PATH + subName + SOUND_NAME + "_" + strconv.Itoa(index + 1), util.SOUND_LENGTH, functionData)
 	}
 
 	util.CreatePlot("n", "f(n)", FIRST_OPTION__PATH + subName, functionsData)
@@ -58,30 +59,32 @@ func makeFirstOptionThirdSub() {
 func PerformSecondOption()  {
 	var plotData []types.PlotData
 	function := createSecondFunction()
-	plotData = append(plotData, types.PlotData{
+	functionData := types.PlotData{
 		Function: function,
 		Name: SECOND_OPTION__PATH,
 		InitialN: 0,
-		EndN: 2000,
-		Step: 0.01,
-	})
+		EndN: 50000,
+		Step: 1,
+	}
+	plotData = append(plotData, functionData)
 	util.CreatePlot("n", "f(n)", SECOND_OPTION__PATH, plotData)
 
-	util.WriteWAV(SECOND_OPTION__PATH + SOUND_NAME , util.SOUND_LENGTH, function)
+	util.WriteWAV(SECOND_OPTION__PATH + SOUND_NAME , util.SOUND_LENGTH, functionData)
 }
 
 
 func PerformThirdOption()  {
 	var plotData []types.PlotData
 	function := createThirdFunction(THIRD_OPTION__AMOUNT_CYCLES)
-	plotData = append(plotData, types.PlotData{
+	functionData := types.PlotData{
 		Function: function,
 		Name: THIRD_OPTION__PATH,
 		InitialN: 0,
-		EndN: 1,
-		Step: 0.005,
-	})
+		EndN: 100000,
+		Step: 5,
+	}
+	plotData = append(plotData, functionData)
 	util.CreatePlot("n", "f(n)",THIRD_OPTION__PATH, plotData)
 
-	util.WriteWAV(THIRD_OPTION__PATH + SOUND_NAME, util.SOUND_LENGTH, function)
+	util.WriteWAV(THIRD_OPTION__PATH + SOUND_NAME, util.SOUND_LENGTH, functionData)
 }

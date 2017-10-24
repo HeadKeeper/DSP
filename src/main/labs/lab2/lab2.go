@@ -36,18 +36,18 @@ func performOption(optionName string, functionCreator func(n float64) float64)  
 			Name: "M = " + strconv.Itoa(int(currentM)),
 			InitialN: 0,
 			EndN: currentM,
-			Step: 0.1,
+			Step: 50,
 		}
 		values = append(values, currentFunctionData)
 		statistic = append(statistic, analyzeData(currentM, currentFunctionData))
 	}
 	drawStatisticData(optionName, statistic)
-	drawPlotAndMakeSound(optionName, functionCreator, values)
+	drawPlotAndMakeSound(optionName, values)
 }
 
-func drawPlotAndMakeSound(optionName string, function func(n float64) float64, values []types.PlotData) {
-	util.CreatePlotWithStyle("n", "f(n)", INITIAL_PATH + "_" + optionName, "points", values)
-	util.WriteWAV(INITIAL_PATH + "_" + optionName + SOUND_NAME, util.SOUND_LENGTH, function)
+func drawPlotAndMakeSound(optionName string, values []types.PlotData) {
+	//util.CreatePlotWithStyle("n", "f(n)", INITIAL_PATH + "_" + optionName, "points", values)
+	util.WriteWAV(INITIAL_PATH + "_" + optionName + SOUND_NAME, util.SOUND_LENGTH, values[0])
 }
 
 func drawStatisticData(optionName string, statistic []types.SecondLabStat) {

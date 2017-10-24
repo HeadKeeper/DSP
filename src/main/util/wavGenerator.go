@@ -5,21 +5,21 @@ import (
 	"os"
 
 	"github.com/cryptix/wav"
-	"math"
+	"main/types"
 )
 
 const (
 	DEFAULT_CHANNELS = 1				// 1
-	DEFAULT_BITS     = 16 				// Tone is lower when value is lower (8, 16, 32, 64 ...)
-	DEFAULT_RATE 	 = 32768 			// 44100
+	DEFAULT_BITS     = 32 				// Tone is lower when value is lower (8, 16, 32, 64 ...)
+	DEFAULT_RATE 	 = 44100 			// 44100 32768
 
 	DEFAULT_OUT_PATH = "out/"
 )
 
-func WriteWAV(name string, soundLength int, function func(n float64) float64) {
+func WriteWAV(name string, soundLength int, functionData types.PlotData) {
 	var signal []float64
-	for n := 0; n < DEFAULT_RATE; n++ {
-		signal = append(signal, function(float64(n)))
+	for n := functionData.InitialN; n < functionData.EndN; n+= functionData.Step {
+		signal = append(signal, functionData.Function(float64(n)))
 	}
 	WriteWAVForSignal(name, soundLength, signal)
 }
@@ -33,6 +33,7 @@ func WriteWAVForSignal(name string, soundLength int, signal []float64) {
 		Channels:        DEFAULT_CHANNELS,
 		SampleRate:      DEFAULT_RATE,
 		SignificantBits: DEFAULT_BITS,
+		//NumberOfSamples: uint32(len(signal) * SOUND_LENGTH),
 	}
 
 	writer, err := meta.NewWriter(wavOut)
@@ -42,7 +43,6 @@ func WriteWAVForSignal(name string, soundLength int, signal []float64) {
 	for n := 0; n < soundLength / 2; n++ {
 		for idx := range signal {
 			funRes := int32(
-				math.Pow(2, DEFAULT_BITS-1) *
 				signal[idx],
 			)
 			writer.WriteInt32(funRes)

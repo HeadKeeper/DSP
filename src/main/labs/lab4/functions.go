@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	B1 = 10000.0
-	B2 = 1.0
+	B1 = 2000000000.0
+	B2 = 100.0
 	HARMONICS_AMOUNT = 20
 )
 
@@ -19,7 +19,7 @@ var (
 
 func CreateSignalFunction() func(x float64) float64 {
 	return func(x float64) float64 {
-		result := B1 * math.Sin(2 * math.Pi * x / util.BUFFER_SIZE)
+		result := B1 * math.Sin(2 * math.Pi * 440 * x / util.BUFFER_SIZE)
 		var sum float64
 		for index := 50; index < 70; index++ {
 			sum += math.Pow(-1, util.GetRandomValue(EPSYLON_VALUES)) * B2 * math.Sin(2 * math.Pi * x * float64(index) / util.BUFFER_SIZE)

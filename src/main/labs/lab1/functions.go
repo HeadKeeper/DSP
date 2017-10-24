@@ -7,13 +7,13 @@ import (
 )
 
 const (
-	FIRST_OPTION__a__f  float64 = 4   		    // frequency
-	FIRST_OPTION__a__A  float64 = 9   		    // amplitude of fluctuations
+	FIRST_OPTION__a__f  float64 = 440   		    // frequency
+	FIRST_OPTION__a__A  float64 = 2000000000   		// amplitude of fluctuations
 
-	FIRST_OPTION__b__A   float64 = 7
+	FIRST_OPTION__b__A   float64 = 2000000000
 	FIRST_OPTION__b__Phi float64 = math.Pi / 6 // initial angle
 
-	FIRST_OPTION__c__f   float64 = 7
+	FIRST_OPTION__c__f   float64 = 440
 	FIRST_OPTION__c__Phi float64 = math.Pi / 6
 
 	THIRD_OPTION__INC_MAX_VALUE float64 = 0.20
@@ -28,51 +28,51 @@ var (
 		math.Pi / 6,
 	}
 	FREQUENCY_VALUES = []float64 {
-		4,
-		8,
-		2,
-		1,
-		9,
+		440,
+		880,
+		220,
+		1760,
+		1000,
 	}
 	AMPLITUDE_VALUES = []float64 {
-		4,
-		5,
-		3,
-		1,
-		7,
+		2000000000,
+		1500000000,
+		2100000000,
+		1000000000,
+		1750000000,
 	}
 
 	SECOND_OPTION_HARMONICS     = []types.Harmonic {
 		{
-			Amplitude: 7,
-			Frequency: 1,
+			Amplitude: 2000000000,
+			Frequency: 440,
 			Phi:       math.Pi,
 		},
 		{
-			Amplitude: 7,
-			Frequency: 2,
+			Amplitude: 2000000000,
+			Frequency: 220,
 			Phi:       math.Pi / 4,
 		},
 		{
-			Amplitude: 7,
-			Frequency: 3,
+			Amplitude: 2000000000,
+			Frequency: 880,
 			Phi:       0,
 		},
 		{
-			Amplitude: 7,
-			Frequency: 4,
+			Amplitude: 2000000000,
+			Frequency: 1760,
 			Phi:       3 * math.Pi / 4,
 		},
 		{
-			Amplitude: 7,
-			Frequency: 5,
+			Amplitude: 2000000000,
+			Frequency: 1000,
 			Phi:       math.Pi / 2,
 		},
 	}
 
 	THIRD_OPTION__INIT_HARMONIC = types.Harmonic{
-		Amplitude: 7,
-		Frequency: 4,
+		Amplitude: 2000000000,
+		Frequency: 220,
 		Phi:       math.Pi / 6,
 	}
 )
@@ -107,13 +107,13 @@ func createThirdFunction(cyclesCount int) func(x float64) float64 {
 	return func(n float64) float64 {
 		var value float64
 
-		for idx := 0; idx < cyclesCount; idx++ {
+		//for idx := 0; idx < cyclesCount; idx++ {
 			value += util.GetHarmonicFunction(harmonic.Amplitude, harmonic.Frequency, harmonic.Phi)(n)
-		}
+		//}
 
-		harmonic.Phi *= 1.0 + coefficient
-		harmonic.Amplitude *= 1.0 + coefficient
-		harmonic.Frequency *= 1.0 + coefficient
+		harmonic.Phi *= 1.0 + coefficient / 100
+		harmonic.Amplitude *= 1.0 + coefficient / 100
+		harmonic.Frequency *= 1.0 + coefficient / 100
 		return value
 	}
 }

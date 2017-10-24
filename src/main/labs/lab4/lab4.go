@@ -36,12 +36,11 @@ func PerformThirdOption() {
 	util.CreateXYPlot("i", "x(i)", indexes, newSignalByMovingAverage, OUTPUT_3_NAME + "moving_average")
 	util.CreateXYPlot("i", "x(i)", indexes, newSignalByParabola, OUTPUT_3_NAME + "parabola_eleven")
 	util.CreateXYPlot("i", "x(i)", indexes, newSignalByMedianFilter, OUTPUT_3_NAME + "median_filter")
-	/*
-	util.WriteWAV(OUTPUT_3_NAME + "original_sound", util.SOUND_LENGTH, createSignal)
-	util.WriteWAV(OUTPUT_3_NAME + "moving_average", util.SOUND_LENGTH, createSignal)
-	util.WriteWAV(OUTPUT_3_NAME + "parabola_eleven", util.SOUND_LENGTH, createSignal)
-	util.WriteWAV(OUTPUT_3_NAME + "median_filter", util.SOUND_LENGTH, createSignal)
-	*/
+
+	util.WriteWAVForSignal(OUTPUT_3_NAME + "original_sound", util.SOUND_LENGTH, signal)
+	util.WriteWAVForSignal(OUTPUT_3_NAME + "moving_average", util.SOUND_LENGTH, newSignalByMovingAverage)
+	util.WriteWAVForSignal(OUTPUT_3_NAME + "parabola_eleven", util.SOUND_LENGTH, newSignalByParabola)
+	util.WriteWAVForSignal(OUTPUT_3_NAME + "median_filter", util.SOUND_LENGTH, newSignalByMedianFilter)
 }
 
 func PerformFourthOption() {

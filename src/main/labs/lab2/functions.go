@@ -9,7 +9,7 @@ import (
 const K float64 = util.SIGNAL_RATE / 4
 
 func getHarmonicFunction(phi float64) func(n float64) float64 {
-	return util.GetHarmonicFunction(1, 1, phi)
+	return util.GetHarmonicFunction(2000000000, 440, phi)
 }
 
 func createMArray() []float64 {
