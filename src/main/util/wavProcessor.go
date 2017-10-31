@@ -6,6 +6,7 @@ import (
 
 	"github.com/cryptix/wav"
 	"main/types"
+	"io"
 )
 
 const (
@@ -25,22 +26,24 @@ func WriteWAV(name string, soundLength int, functionData types.PlotData) {
 }
 
 func WriteWAVForSignal(name string, soundLength int, signal []float64) {
-	wavOut, err := os.Create(DEFAULT_OUT_PATH + name + ".wav")
-	checkErr(err)
-	defer wavOut.Close()
-
 	meta := wav.File{
 		Channels:        DEFAULT_CHANNELS,
 		SampleRate:      DEFAULT_RATE,
 		SignificantBits: DEFAULT_BITS,
-		//NumberOfSamples: uint32(len(signal) * SOUND_LENGTH),
 	}
+	WriteWAVByMeta(name, soundLength, signal, meta)
+}
+
+func WriteWAVByMeta(name string, soundLength int, signal []float64, meta wav.File) {
+	wavOut, err := os.Create(DEFAULT_OUT_PATH + name + ".wav")
+	checkErr(err)
+	defer wavOut.Close()
 
 	writer, err := meta.NewWriter(wavOut)
 	checkErr(err)
 	defer writer.Close()
 
-	for n := 0; n < soundLength / 2; n++ {
+	for n := 0; n < soundLength; n++ {
 		for idx := range signal {
 			funRes := int32(
 				signal[idx],
@@ -53,6 +56,42 @@ func WriteWAVForSignal(name string, soundLength int, signal []float64) {
 	writer.Close()
 	fmt.Println()
 	fmt.Println("WAV file '" + name + "' created successful")
+}
+
+func ReadWAV(path string) ([]float64, wav.File){
+	testInfo, err := os.Stat(path)
+	checkErr(err)
+
+	testWav, err := os.Open(path)
+	checkErr(err)
+
+	wavReader, err := wav.NewReader(testWav, testInfo.Size())
+	checkErr(err)
+
+	fmt.Println(wavReader)
+
+
+	var i uint32
+	var signal []float64
+	for i = 0; i < wavReader.GetSampleCount(); i++{
+		n, err := wavReader.ReadSample()
+		if err == io.EOF {
+			break
+		}
+		checkErr(err)
+
+		signal = append(signal, float64(n))
+	}
+	inputMeta := wavReader.GetFile()
+	meta := wav.File {
+		Channels:        inputMeta.Channels,
+		SampleRate:      inputMeta.SampleRate,
+		SignificantBits: inputMeta.SignificantBits,
+		Canonical: inputMeta.Canonical,
+		AudioFormat: inputMeta.AudioFormat,
+	}
+
+	return signal, meta
 }
 
 func checkErr(err error) {

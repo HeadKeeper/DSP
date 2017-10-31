@@ -5,6 +5,8 @@ import (
 	"main/util"
 	"main/types"
 	"math/cmplx"
+	"github.com/cryptix/wav"
+	"fmt"
 )
 
 const (
@@ -37,6 +39,15 @@ func CreateSignal(signalFunction func(x float64) float64) ([]float64, []float64)
 		indexes = append(indexes, idx)
 	}
 	return indexes, signal
+}
+
+func ReadSignal(path string) ([]float64, []float64, wav.File) {
+	signal, meta := util.ReadWAV(path)
+	var indexes []float64
+	for idx := 0; idx < len(signal); idx ++ {
+		indexes = append(indexes, float64(idx))
+	}
+	return indexes, signal, meta
 }
 
 func CreateHarmonics() []types.Harmonic {
@@ -82,8 +93,15 @@ func Fourier(signal []float64) ([]float64, []float64, []float64) {
 	return indexes, amplitudes, beginPhases
 }
 
-func FastFourierTransform(signal []float64, complexSignal []complex128, s int) []complex128 {
-	//complexSignal := make([]complex128, len(signal))
+func FastFourier(signal []float64) {
+	complexSignal := make([]complex128, len(signal))
+	FastFourierTransform(signal, complexSignal, 1)
+	for _, c := range complexSignal {
+		fmt.Println(c)
+	}
+}
+
+func FastFourierTransform(signal []float64, complexSignal []complex128, s int) {
 	bufferSize := len(signal)
 
 	FastFourierTransform(signal, complexSignal, 2 * s)
@@ -93,8 +111,6 @@ func FastFourierTransform(signal []float64, complexSignal []complex128, s int) [
 		tf := cmplx.Rect(1, -2 * math.Pi * float64(k) / float64(bufferSize)) * complexSignal[k + bufferSize / 2]
 		complexSignal[k], complexSignal[k + bufferSize / 2] = complexSignal[k] + tf, complexSignal[k] - tf
 	}
-
-	return complexSignal
 }
 
 func RestoreSignal(amplitudeRanges []float64, phaseRanges []float64) []float64 {
